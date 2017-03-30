@@ -37,7 +37,7 @@ class BckGrndImg(pyglet.sprite.Sprite):
         self.draw()
 
         
-# inherits the background from Spr class 
+# inherits the background from BckGrndImg class 
 class IntroScreen(BckGrndImg):
     def __init__(self, texture=None, width=300, height = 150, x = 10, y = 10, color='#000000'):
         super(IntroScreen, self).__init__(texture, width=width, height=height, x=x, y=y, color=color)
