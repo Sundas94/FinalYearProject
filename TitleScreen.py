@@ -2,8 +2,7 @@ import pyglet
 from time import *
 
 BOARD_WIDTH = 20
-BOARD_HEIGHT = 30
-
+BOARD_HEIGHT = 600      # Sets height of text
 
 # help from online 
 def convert_hashColor_to_RGBA(color):
@@ -16,6 +15,8 @@ def convert_hashColor_to_RGBA(color):
         color = (r,g,b,255)
     return color
 
+
+
 # generates a background image for the intro screen 
 class BckGrndImg(pyglet.sprite.Sprite):
     def __init__(self, texture=None, width=BOARD_WIDTH, height=BOARD_HEIGHT, color='#000000', x=0, y=0):
@@ -25,8 +26,8 @@ class BckGrndImg(pyglet.sprite.Sprite):
             self.texture = texture
         super(BckGrndImg, self).__init__(self.texture)
 
-        self.image.anchor_x = self.image.width 
-        self.image.anchor_y = self.image.height
+        # self.image.anchor_x = self.image.width 
+        # self.image.anchor_y = self.image.height
 
         # set the position
         # position should be middle of screen not bottom
@@ -77,7 +78,7 @@ class Window(pyglet.window.Window):
         self.alive = 1
         self.refreshrate = refreshrate
 
-        self.currentScreen = IntroScreen(x=320, y=BOARD_HEIGHT/2, width=50) 
+        self.currentScreen = IntroScreen(x=320, y=BOARD_HEIGHT/2, width=50)     # x set position of text
         self.screen_has_been_shown_since = time()
 
     def on_draw(self):
@@ -103,5 +104,5 @@ class Window(pyglet.window.Window):
             event = self.dispatch_events()
             sleep(1.0/self.refreshrate)
 
-win = Window(23) # set the fps
+win = Window(20) # set the fps
 win.run()
