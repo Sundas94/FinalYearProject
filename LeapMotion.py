@@ -34,12 +34,41 @@ class LeapMotionListener(Leap.Listener):
     def on_frame(self, controller):
         frame = controller.frame()
 
-        print "Frame ID: " + str(frame.id) \
+        """ print "Frame ID: " + str(frame.id) \
             + "Timestamp: " + str(frame.timestamp) \
             + " # of Hands: " + str(len(frame.hands)) \
             + " # of Fingers: " + str(len(frame.fingers)) \
             + " # of Tools: " + str(len(frame.tools)) \
-            + " # of Gestures: " + str(len(frame.gestures)) 
+            + " # of Gestures: " + str(len(frame.gestures())) """
+
+        # Getting hand data 
+        for hand in frame.hands:
+            handType = "Left Hand" if hand.is_left else "Right Hand"
+
+            print handType + " Hand ID: " + str(hand.id) + " Palm Position: " + str(hand.palm_position)
+
+            normal = hand.palm_normal
+            direction = hand.direction
+
+            print "Pitch: " + str(direction.pitch * Leap.RAD_TO_DEG) + " Roll: " + str(normal.roll * Leap.RAD_TO_DEG)
+
+            # Getting arm data
+            arm = hand.arm
+            print "Arm Direction: " + str(arm.direction) + " Wrist Position: " + str(arm.wrist_position) + " Elbow Postion: " + str(arm.elbow_position)
+           
+            # Getting finger data
+            for finger in hand.fingers:
+                print "Type: " + self.finger_names[finger.type] + " Finger ID: " + str(finger.id) + " Length(mm): " + str(finger.length) + " Width(mm): " + str(finger.width)
+
+                # Bone data
+                for b in range(0, 4): 
+                    bone = finger.bone(b)
+                    print "Bone: " + self.bone_names[bone.type] + " Start: " + str(bone.prev_joint) + " End: " + str(bone.next_joint) + " Direction: " + str(bone.direction)
+
+            # Tools/Objects Data
+            for tools in frame.tools:
+                print "Tool ID: " + str(tool.id) + " Tip position: " + str(tool.tip_position) + " Direction: " + str(tools.direction)
+
 
 def main():
     listener = LeapMotionListener()
