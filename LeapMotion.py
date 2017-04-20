@@ -1,4 +1,4 @@
-import sys, thread, time
+import sys, thread, time, math
 import os, inspect
 
 src_dir = os.path.dirname(inspect.getfile(inspect.currentframe()))
@@ -42,7 +42,7 @@ class LeapMotionListener(Leap.Listener):
             + " # of Gestures: " + str(len(frame.gestures())) """
 
         # Getting hand data 
-        for hand in frame.hands:
+        """for hand in frame.hands:
             handType = "Left Hand" if hand.is_left else "Right Hand"
 
             print handType + " Hand ID: " + str(hand.id) + " Palm Position: " + str(hand.palm_position)
@@ -63,11 +63,47 @@ class LeapMotionListener(Leap.Listener):
                 # Bone data
                 for b in range(0, 4): 
                     bone = finger.bone(b)
-                    print "Bone: " + self.bone_names[bone.type] + " Start: " + str(bone.prev_joint) + " End: " + str(bone.next_joint) + " Direction: " + str(bone.direction)
+                    print "Bone: " + self.bone_names[bone.type] + " Start: " + str(bone.prev_joint) + " End: " + str(bone.next_joint) + " Direction: " + str(bone.direction)"""
 
             # Tools/Objects Data
-            for tools in frame.tools:
-                print "Tool ID: " + str(tool.id) + " Tip position: " + str(tool.tip_position) + " Direction: " + str(tools.direction)
+        """for tools in frame.tools:
+                print "Tool ID: " + str(tool.id) + " Tip position: " + str(tool.tip_position) + " Direction: " + str(tools.direction)"""
+
+            # Gestures data
+        for gesture in frame.gestures(): 
+                """if gesture.type == Leap.Gesture.TYPE_CIRCLE:
+                    circle = CircleGesture(gesture)
+
+                    if circle.pointable.direction.angle_to(circle.normal) <= Leap.PI/2:
+                        clockwiseness = "clockwise"
+                    else:
+                        clockwiseness= "anti-clockwise"
+
+                    swept_angle = 0
+                    if circle.state != Leap.Gesture.STATE_START:
+                        previous = CircleGesture(controller.frame(1).gesture(circle.id))
+                        swept_angle = (circle.progress - previous.progress) * 2 * Leap.PI
+
+                    print "ID: " + str(circle.id) + " Progress: " + str(circle.progress) + " Radius(mm): " + str(circle.radius) \
+                    + " Swept Angle: " + str(swept_angle * Leap.RAD_TO_DEG) + " " + clockwiseness"""
+                
+
+                # Recognising hand swiping gestures
+                
+                if gesture.type == Leap.Gesture.TYPE_SWIPE:
+                    swipe = SwipeGesture(gesture)
+                    """print "Swipe ID: " + str(swipe.id) + " State: " + self.state_names[gesture.state] + " Position: " + str(swipe.position) \
+                    + " Direction: " + str(swipe.direction) + " Speed(mm/s): " + str(swipe.speed)"""
+                    swipeDir = swipe.direction
+                    if(swipeDir.x > 0 and math.fabs(swipeDir.x) > math.fabs(swipeDir.y)):
+                        print "Swiped right"
+                    elif(swipeDir.x < 0 and math.fabs(swipeDir.x) > math.fabs(swipeDir.y)):
+                        print "Swiped left"
+                    elif(swipeDir.y > 0 and math.fabs(swipeDir.x) < math.fabs(swipeDir.y)):
+                        print "Swiped up"
+                    elif(swipeDir.y < 0 and math.fabs(swipeDir.x) < math.fabs(swipeDir.y)):
+                        print "Swiped down"
+
 
 
 def main():
