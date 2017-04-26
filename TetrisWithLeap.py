@@ -9,15 +9,29 @@ arch_dir = os.path.abspath(os.path.join(src_dir, '../lib'))
 sys.path.insert(0, os.path.abspath(os.path.join(src_dir, arch_dir)))
 
 import Leap
+import logging
 
 from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
-
 
 
 BLOCK_EMPTY = 0
 BLOCK_FULL = 1
 BLOCK_ACTIVE = 2
-BLOCK_IMG_FILE = 'images/block.png'
+
+"""
+folder=r"/Users/SundasShahid/College/Year5/Project/LeapDeveloperKit_2.3.1+31549_mac/LeapSDK/samples/images"
+
+a=random.choice(os.chdir(folder))
+
+BLOCK_IMG_FILE = a
+"""
+
+
+BLOCK_IMG_FILE = 'images/green.png'
+
+
+#BLOCK_IMG_FILE = random.choice(os.chdir(r"/Users/SundasShahid/College/Year5/Project/LeapDeveloperKit_2.3.1+31549_mac/LeapSDK/samples/images"))
+
 
 block = pyglet.image.load(BLOCK_IMG_FILE)
 
@@ -28,6 +42,67 @@ BLOCK_HEIGHT = block.height
 
 window = pyglet.window.Window(width=BOARD_WIDTH*BLOCK_WIDTH,
                               height=BOARD_HEIGHT*BLOCK_HEIGHT)
+
+
+class LeapMotionListener(Leap.Listener):
+    finger_names = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky']
+    bone_names = ['Metacarpal', 'Proximal', 'Intermediate', 'Distal']
+    state_names = ['STATE_INVALID', 'STATE_START', 'STATE_UPDATE', 'STATE_END']
+
+    def on_connect(self, controller):
+        logging.debug("Motion Sensor Connected!")
+
+        controller.enable_gesture(Leap.Gesture.TYPE_CIRCLE);
+        controller.enable_gesture(Leap.Gesture.TYPE_SWIPE);
+
+    def on_disconnect(self, controller):
+        logging.debug("Motion Sensor Disconnected")
+
+    def on_frame(self, controller):
+        frame = controller.frame()
+
+        for gesture in frame.gestures():
+            if gesture.type == Leap.Gesture.TYPE_SWIPE:
+                swipe = SwipeGesture(gesture)
+                swipeDir = swipe.direction
+                if (swipeDir.x > 0 and math.fabs(swipeDir.x) > math.fabs(swipeDir.y)):
+                    logging.debug("Swiped Left")
+                    moveLeft(board)
+                    print "Left"
+                elif (swipeDir.x < 0 and math.fabs(swipeDir.x) > math.fabs(swipeDir.y)):
+                    logging.debug("Swiped Right")
+                    moveRight(board)
+                    print "Right"
+                elif (swipeDir.y < 0 and math.fabs(swipeDir.x) < math.fabs(swipeDir.y)):
+                    logging.debug("Swiped Down")
+                    moveDown(board)
+                    print "Swiped down"
+
+    def move_piece(self, motion_state):
+        if gesture.type == Leap.Gesture.TYPE_SWIPE:
+            swipe = SwipeGesture(gesture)
+            swipeDir = swipe.direction
+            if (swipeDir.x > 0 and math.fabs(swipeDir.x) > math.fabs(swipeDir.y)):
+                self.moveLeft()
+
+    def main():
+        listener = LeapMotionListener()
+        controller = Leap.Controller()
+
+        controller.add_listener(listener)
+
+        print "Press enter to quit"
+
+        try:
+            sys.stdin.readline()
+        except KeyboardInterrupt:
+            pass
+        finally:
+            controller.remove_listener(listener)
+
+        if __name__ == "__main__":
+            main()
+
 
 class Shape(object):
     
@@ -68,11 +143,17 @@ class Shape(object):
          [0, 0, 0, 0]]
     ]
 
+    leap = LeapMotionListener()
+    controller = Leap.Controller()
+    controller.add_listener(leap)
+
 
     def __init__(self, x=0, y=0):
         self.shape = random.choice(self._shapes)
         self.shape = self.copy_shape()
-        
+        logging.basicConfig(filename='example.log', level=logging.DEBUG)
+        logging.debug('This message should go to the log file')
+        self.leap.on_frame(self.controller)
         for i in range(random.choice(range(4))):
             self.rotate()
         
@@ -125,6 +206,7 @@ class Board(pyglet.event.EventDispatcher):
     active_shape = None
     pending_shape = None
     board = None
+    leap = None
     
     def __init__(self, width, height, block):
         self.width, self.height = width, height
@@ -132,6 +214,8 @@ class Board(pyglet.event.EventDispatcher):
         self.calculated_height = self.height * BLOCK_HEIGHT
         self.calculated_width = self.width * BLOCK_WIDTH
         self.reset()
+
+        #self.leap.__init__()
     
     def reset(self):
         self.board = []
@@ -246,23 +330,22 @@ class Board(pyglet.event.EventDispatcher):
         if lines_found:
             self.dispatch_event('on_lines', lines_found)
 
-    def move_piece(self, motion_state):
+    """def move_piece(self, motion_state):
         if gesture.type == Leap.Gesture.TYPE_SWIPE:
             swipe = SwipeGesture(gesture)
             swipeDir = swipe.direction
-            if motion_state == (swipeDir.x > 0 and math.fabs(swipeDir.x) > math.fabs(swipeDir.y)):
+            if(swipeDir.x < 0 and math.fabs(swipeDir.x) > math.fabs(swipeDir.y)):
                 self.move_left()
-            elif motion_state == (swipeDir.y < 0 and math.fabs(swipeDir.x) < math.fabs(swipeDir.y)):
-                self.move_down()
-                
-        """if motion_state == key.MOTION_LEFT:
+                print "Swiped Left"
+        if motion_state == key.MOTION_LEFT:
             self.move_left()
         elif motion_state == key.MOTION_RIGHT:
             self.move_right()
         elif motion_state == key.MOTION_UP:
             self.rotate_shape()
         elif motion_state == key.MOTION_DOWN:
-            self.move_down()"""
+            self.move_down()
+        """
     
     def draw_game_board(self):
         for y, row in enumerate(board.board):
@@ -285,55 +368,59 @@ class Board(pyglet.event.EventDispatcher):
 Board.register_event_type('on_lines')
 Board.register_event_type('game_over')
 
-class LeapMotionListener(Leap.Listener):
-    finger_names = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky']
-    bone_names = ['Metacarpal', 'Proximal', 'Intermediate', 'Distal']
-    state_names = ['STATE_INVALID', 'STATE_START', 'STATE_UPDATE', 'STATE_END']
+class rotateShape(Board):
 
-    def on_connect(self, controller):
-        print "Motion Sensor Connected!"
+    def check(self):
 
-        controller.enable_gesture(Leap.Gesture.TYPE_CIRCLE);
-        controller.enable_gesture(Leap.Gesture.TYPE_KEY_TAP);
-        controller.enable_gesture(Leap.Gesture.TYPE_SCREEN_TAP);
-        controller.enable_gesture(Leap.Gesture.TYPE_SWIPE);
+        rotated_shape = self.active_shape.copied()
+        rotated_shape.rotate()
 
-    def on_disconnect(self, controller):
-        print "Motion Sensor Disconnected"
+        if rotated_shape.left_edge + rotated_shape.x < 0:
+            rotated_shape.x = -rotated_shape.left_edge
+            
+        elif rotated_shape.right_edge + rotated_shape.x >= self.width:
+            rotated_shape.x = self.width - rotated_shape.right_edge - 1
+        
+        if rotated_shape.bottom_edge + rotated_shape.y > self.height:
+            return False
+        
+        if not self.is_collision(rotated_shape):
+            self.active_shape = rotated_shape
 
-    def on_frame(self, controller):
-        frame = controller.frame()
 
-        for gesture in frame.gestures(): 
-            if gesture.type == Leap.Gesture.TYPE_SWIPE:
-                    swipe = SwipeGesture(gesture)
-                    swipeDir = swipe.direction
-                    if(swipeDir.x > 0 and math.fabs(swipeDir.x) > math.fabs(swipeDir.y)):
-                        print "Swiped right"
-                    elif(swipeDir.x < 0 and math.fabs(swipeDir.x) > math.fabs(swipeDir.y)):
-                        print "Swiped left"
-                    elif(swipeDir.y > 0 and math.fabs(swipeDir.x) < math.fabs(swipeDir.y)):
-                        print "Swiped up"
-                    elif(swipeDir.y < 0 and math.fabs(swipeDir.x) < math.fabs(swipeDir.y)):
-                        print "Swiped down"
+class moveLeft(Board):
 
-    def main():
-        listener = LeapMotionListener()
-        controller = Leap.Controller()
+    def check(self):
 
-        controller.add_listener(listener)
+        self.active_shape.x -= 1
+        if self.out_of_bounds() or self.is_collision():
+            self.active_shape.x += 1
+            return False
+        return True
 
-        print "Press enter to quit"
+class moveRight(Board):
 
-        try:
-            sys.stdin.readline()
-        except KeyboardInterrupt:
-            pass
-        finally:
-            controller.remove_listener(listener)
+    def check(self):
 
-        if __name__ == "__main__":
-         main()
+        self.active_shape.x += 1
+        if self.out_of_bounds() or self.is_collision():
+            self.active_shape.x -= 1
+            return False
+        return True
+
+class moveDown(Board):
+
+    def check(self): 
+
+        self.active_shape.y += 1
+            
+        if self.check_bottom() or self.is_collision():
+            self.active_shape.y -= 1
+            self.shape_to_board()
+            self.add_shape()
+            return False
+        return True
+
 
 
 class Game(object):
