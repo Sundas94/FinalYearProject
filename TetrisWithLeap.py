@@ -67,15 +67,15 @@ class LeapMotionListener(Leap.Listener):
                 swipeDir = swipe.direction
                 if (swipeDir.x > 0 and math.fabs(swipeDir.x) > math.fabs(swipeDir.y)):
                     logging.debug("Swiped Left")
-                    moveLeft(board)
+                    board.move_left()
                     print "Left"
                 elif (swipeDir.x < 0 and math.fabs(swipeDir.x) > math.fabs(swipeDir.y)):
                     logging.debug("Swiped Right")
-                    moveRight(board)
+                    board.move_right()
                     print "Right"
                 elif (swipeDir.y < 0 and math.fabs(swipeDir.x) < math.fabs(swipeDir.y)):
                     logging.debug("Swiped Down")
-                    moveDown(board)
+                    board.move_down()
                     print "Swiped down"
 
     def move_piece(self, motion_state):
@@ -85,7 +85,7 @@ class LeapMotionListener(Leap.Listener):
             if (swipeDir.x > 0 and math.fabs(swipeDir.x) > math.fabs(swipeDir.y)):
                 self.moveLeft()
 
-    def main():
+    def main(self):
         listener = LeapMotionListener()
         controller = Leap.Controller()
 
@@ -151,6 +151,7 @@ class Shape(object):
     def __init__(self, x=0, y=0):
         self.shape = random.choice(self._shapes)
         self.shape = self.copy_shape()
+        #board = Board()
         logging.basicConfig(filename='example.log', level=logging.DEBUG)
         logging.debug('This message should go to the log file')
         self.leap.on_frame(self.controller)
@@ -330,22 +331,6 @@ class Board(pyglet.event.EventDispatcher):
         if lines_found:
             self.dispatch_event('on_lines', lines_found)
 
-    """def move_piece(self, motion_state):
-        if gesture.type == Leap.Gesture.TYPE_SWIPE:
-            swipe = SwipeGesture(gesture)
-            swipeDir = swipe.direction
-            if(swipeDir.x < 0 and math.fabs(swipeDir.x) > math.fabs(swipeDir.y)):
-                self.move_left()
-                print "Swiped Left"
-        if motion_state == key.MOTION_LEFT:
-            self.move_left()
-        elif motion_state == key.MOTION_RIGHT:
-            self.move_right()
-        elif motion_state == key.MOTION_UP:
-            self.rotate_shape()
-        elif motion_state == key.MOTION_DOWN:
-            self.move_down()
-        """
     
     def draw_game_board(self):
         for y, row in enumerate(board.board):
