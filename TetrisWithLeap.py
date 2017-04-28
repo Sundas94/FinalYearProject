@@ -4,6 +4,9 @@ import os, inspect
 import pyglet
 from pyglet.window import key
 
+music = pyglet.resource.media('tetrismusic.wav')
+music.play()
+
 src_dir = os.path.dirname(inspect.getfile(inspect.currentframe()))
 arch_dir = os.path.abspath(os.path.join(src_dir, '../lib'))
 sys.path.insert(0, os.path.abspath(os.path.join(src_dir, arch_dir)))
@@ -77,6 +80,12 @@ class LeapMotionListener(Leap.Listener):
                     logging.debug("Swiped Down")
                     board.move_down()
                     print "Swiped down"
+            elif gesture.type == Leap.Gesture.TYPE_CIRCLE:
+                circle = CircleGesture(gesture)
+                if circle.state != Leap.Gesture.STATE_START:
+                    previous = CircleGesture(controller.frame(1).gesture(circle.id))
+                    board.rotate_shape()
+                    print "Rotate"
 
     def move_piece(self, motion_state):
         if gesture.type == Leap.Gesture.TYPE_SWIPE:
