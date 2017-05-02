@@ -17,34 +17,13 @@ import logging
 from Leap import CircleGesture, SwipeGesture, ScreenTapGesture, KeyTapGesture
 
 
-#music = pyglet.resource.media('tetris.mp3')
-#music.play()
+music = pyglet.resource.media('tetris.mp3')
+music.play()
 
 BLOCK_EMPTY = 0
 BLOCK_FULL = 1
 BLOCK_ACTIVE = 2
 
-"""
-
-path=r"/Users/SundasShahid/College/Year5/Project/LeapDeveloperKit_2.3.1+31549_mac/LeapSDK/samples/images"
-
-#a=random.choice(os.chdir(folder))
-
-
-BLOCK_IMG_FILE = random_filename
-
-folder=r"/Users/SundasShahid/College/Year5/Project/LeapDeveloperKit_2.3.1+31549_mac/LeapSDK/samples/images"
-random_filename = random.choice([
-    x for x in os.listdir(folder)
-    if os.path.isfile(os.path.join(folder, x))
-])
-
-BLOCK_IMG_FILE = random_filename
-print(BLOCK_IMG_FILE)
-
-"""
-
-#BLOCK_IMG_FILE = 'images/gray_image.png'
 
 block = 'images/block.png'
 yellow = 'images/yellow.png'
